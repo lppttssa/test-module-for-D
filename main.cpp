@@ -58,7 +58,6 @@ void getPath(int from, int to) {
         tmp.push_back(path[i]);
     }
     path = tmp;
-    path.push_back(to);
 }
 
 double Dijkstra(vector <vector <part>> list_, int fromVert, int endVert, int vertNum) {
@@ -112,14 +111,16 @@ double Dijkstra(vector <vector <part>> list_, int fromVert, int endVert, int ver
 
 
 int main() {
-    int minN = 3;
-    int maxN = 1000;
+    int minN = 500;
+    int maxN = 500;
+    int max = 0;
+    int num = 0;
 
 
-    srand(time(NULL));
+    srand(9);
     for (int i = 0; i < 100; ++i) {
+
         int testNum = i;
-        cout << testNum << "\n";
         string testName = "input" + to_string(testNum) + ".txt";
 
         ofstream out("D:\\6sem\\algorithm\\testDirective\\tests100\\" + testName);
@@ -129,7 +130,7 @@ int main() {
         int nVertex = minN + rand() % (maxN - minN + 1);
 
 
-        int minM = nVertex;
+        int minM = 3;
         int maxM = (nVertex * (nVertex - 1)) / 2;
 //    Получаем minM <= nEdges <= maxM
         int nEdges = minM + rand() % (maxM - minM + 1);
@@ -218,7 +219,71 @@ int main() {
 
 
         //Генерируем часть с изменением графа///
-        int minChangedVert = 1;
+        int changes = path.size();
+        for (int i = 1; i < path.size(); ++i) {
+            vector<newVertPlace> changedVerts(0);
+            vector<newEdgesStruct> newEdges(0);
+            bool isContinued = false;
+            int changedVert = path[i];
+            int newX = minC + rand() % (maxC - minC + 1);
+            int newY = minC + rand() % (maxC - minC + 1);
+            for (auto i: coord) {
+                if ((i.x == newX) && (i.y == newY)) {
+                    isContinued = true;
+                }
+            }
+            if (isContinued) {
+                i--;
+                continue;
+            }
+            //coord[changedVert].x = newX;
+            //coord[changedVert].y = newY;
+            changedVerts.push_back({changedVert, coord[changedVert].x, coord[changedVert].y});
+
+
+            for (auto k: list[changedVert]) {
+                double minWeight = sqrt(pow(coord[changedVert].x - coord[k.vert].x, 2) + pow(coord[changedVert].y - coord[k.vert].y, 2));
+                double maxWeight = minWeight * 2;
+                double f = (double)rand() / RAND_MAX;
+                double changedWeight = minWeight + f * (maxWeight - minWeight);
+                k.weight = changedWeight;
+                newEdges.push_back({changedVert, k.vert, changedWeight});
+            }
+
+            /*for (int j = 0; j < list.size(); j++) {
+                for (auto k: list[j]) {
+                    if (j == changedVert) {
+                        double changedWeight = sqrt(pow(coord[j].x - coord[k.vert].x, 2) + pow(coord[j].y - coord[k.vert].y, 2));
+                        k.weight = changedWeight;
+                        newEdges.push_back({j, k.vert, changedWeight});
+                    }
+                    if (k.vert == changedVert) {
+                        double changedWeight = sqrt(pow(coord[j].x - coord[k.vert].x, 2) + pow(coord[j].y - coord[k.vert].y, 2));
+                        k.weight = changedWeight;
+                        newEdges.push_back({j, k.vert, changedWeight});
+                    }
+                }
+            }*/
+
+            out << "Y\n" << changedVerts.size() << " " << newEdges.size() << "\n";
+            for (auto j: changedVerts) {
+                out << j.vert << " " << j.x << " " << j.y << "\n";
+            }
+            for (auto j: newEdges) {
+                out << j.start << " " << j.end << " " << j.weight << "\n";
+            }
+
+            //testNum++;
+
+            double res = Dijkstra(list, 0, nVertex - 1, nVertex);
+            getPath(0, nVertex - 1);
+
+        }
+
+        cout << testNum << " " << path.size() << "\n";
+
+
+        /*int minChangedVert = 1;
         int maxChangedVert = 1;
 //    Находим количество измененных вершин
         int changedVertNum = minChangedVert + rand() % (maxChangedVert - minChangedVert + 1);
@@ -271,6 +336,13 @@ int main() {
             out << j.start << " " << j.end << " " << j.weight << "\n";
         }
 
-        testNum++;
+        testNum++;*/
+        //cout << testNum << " \n";
+        if (max < path.size()) {
+            max = path.size();
+            num = testNum;
+        }
     }
+
+    cout << max << " " << num;
 }
